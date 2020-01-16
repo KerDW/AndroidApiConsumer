@@ -9,10 +9,14 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
 import com.squareup.picasso.Picasso;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -52,11 +56,13 @@ public class MainActivity extends AppCompatActivity {
                 JsonObject obj = jsonElement.getAsJsonObject();
 
                 if (obj != null) {
-                    List<Character> chars = obj.get("results");
-                    for (Character c : chars) {
-                        Log.e("xd", c.getName());
-                    }
-                    ArrayAdapter<Character> list = new ArrayAdapter<Character>(MainActivity.this, android.R.layout.simple_list_item_1, chars);
+                    JsonArray charsJson = obj.getAsJsonArray("results");
+
+                    List<String> chars = null;
+
+                    chars.addAll(charsJson);
+
+                    ArrayAdapter<String> list = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_list_item_1, chars);
                     lv.setAdapter(list);
                 }
 
