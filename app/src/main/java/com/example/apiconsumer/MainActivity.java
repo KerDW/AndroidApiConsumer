@@ -9,6 +9,8 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -40,17 +42,17 @@ public class MainActivity extends AppCompatActivity {
 
         service = retrofit.create(apiService.class);
 
-        Call<List<Character>> call = service.getCharacters();
+        Call<JsonElement> call = service.getCharacters();
 
-        call.enqueue(new Callback<List<Character>>() {
+        call.enqueue(new Callback<JsonElement>() {
             @Override
-            public void onResponse(Call<List<Character>> call, Response<List<Character>> response) {
+            public void onResponse(Call<JsonElement> call, Response<JsonElement> response) {
 
-                List<Character> chars = response.body();
+                JsonElement jsonElement = response.body();
+                JsonObject obj = jsonElement.getAsJsonObject();
 
-                Log.e("xd", chars+"");
-
-                if (chars != null) {
+                if (obj != null) {
+                    List<Character> chars = obj.get("results");
                     for (Character c : chars) {
                         Log.e("xd", c.getName());
                     }
@@ -61,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Call<List<Character>> call, Throwable t) {
+            public void onFailure(Call<JsonElement> call, Throwable t) {
 
                 Toast.makeText(MainActivity.this, "API error", Toast.LENGTH_SHORT).show();
                 Log.e("xd", t.getMessage());

@@ -1,5 +1,7 @@
 package com.example.apiconsumer;
 
+import com.google.gson.JsonElement;
+
 import java.util.List;
 
 import retrofit2.Call;
@@ -12,5 +14,5 @@ public interface apiService {
     Call<Character> getCharacter(@Path("idChar") int idChar);
 
     @GET("character")
-    Call<List<Character>> getCharacters();
+    Call<JsonElement> getCharacters();
 }
