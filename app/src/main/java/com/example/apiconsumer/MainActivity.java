@@ -16,6 +16,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.squareup.picasso.Picasso;
 
+import org.json.JSONObject;
+
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +33,8 @@ public class MainActivity extends AppCompatActivity {
 
     apiService service;
     ListView lv;
+    int page = 1;
+    boolean done = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
 
         service = retrofit.create(apiService.class);
 
-        Call<JsonElement> call = service.getCharacters();
+        Call<JsonElement> call = service.getCharacters(page);
 
         call.enqueue(new Callback<JsonElement>() {
             @Override
@@ -55,15 +59,29 @@ public class MainActivity extends AppCompatActivity {
                 JsonElement jsonElement = response.body();
                 JsonObject obj = jsonElement.getAsJsonObject();
 
+                Log.e("xd", "xddd");
+
                 if (obj != null) {
-                    JsonArray charsJson = obj.getAsJsonArray("results");
 
-                    List<String> chars = null;
+                    Log.e("xd", obj.has("error")+"");
 
-                    chars.addAll(charsJson);
+                    if(obj.has("error")){
+                        done = true;
+                    }
 
-                    ArrayAdapter<String> list = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_list_item_1, chars);
-                    lv.setAdapter(list);
+
+
+                    JsonObject charsJson = obj.getAsJsonObject("results");
+
+                    if (page == 1) {
+                        JsonObject info = obj.getAsJsonObject("info");
+                        page = info.get("pages").getAsInt();
+                    }
+
+                    System.out.println(charsJson.toString());
+
+//                        ArrayAdapter<String> list = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_list_item_1, chars);
+//                        lv.setAdapter(list);
                 }
 
             }

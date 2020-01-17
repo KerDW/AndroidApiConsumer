@@ -7,6 +7,7 @@ import java.util.List;
 import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 public interface apiService {
 
@@ -14,5 +15,5 @@ public interface apiService {
     Call<Character> getCharacter(@Path("idChar") int idChar);
 
     @GET("character")
-    Call<JsonElement> getCharacters();
+    Call<JsonElement> getCharacters(@Query("page") int page);
 }
