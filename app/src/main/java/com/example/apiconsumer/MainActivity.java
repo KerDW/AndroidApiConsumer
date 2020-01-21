@@ -4,7 +4,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -13,15 +12,9 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.reflect.TypeToken;
-import com.squareup.picasso.Picasso;
 
-import org.json.JSONObject;
-
-import java.lang.reflect.Type;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -33,8 +26,14 @@ public class MainActivity extends AppCompatActivity {
 
     apiService service;
     ListView lv;
-    int page = 1;
+
+    int pageNo = 1;
     boolean done = false;
+
+    ArrayList<String> chars = new ArrayList<>();
+    ArrayAdapter<String> list;
+
+    Gson gson = new Gson();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,48 +49,60 @@ public class MainActivity extends AppCompatActivity {
 
         service = retrofit.create(apiService.class);
 
-        Call<JsonElement> call = service.getCharacters(page);
+        list = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, chars);
+        lv.setAdapter(list);
 
-        call.enqueue(new Callback<JsonElement>() {
+        Thread thread = new Thread(new Runnable() {
+
             @Override
-            public void onResponse(Call<JsonElement> call, Response<JsonElement> response) {
+            public void run() {
 
-                JsonElement jsonElement = response.body();
-                JsonObject obj = jsonElement.getAsJsonObject();
+                for (int i = 0; i < pageNo; i++) {
 
-                Log.e("xd", "xddd");
+                    Call<JsonElement> call = service.getCharacters(i+1);
 
-                if (obj != null) {
+                    try {
+                        Response <JsonElement> response = call.execute();
 
-                    Log.e("xd", obj.has("error")+"");
+                        JsonElement jsonElement = response.body();
+                        JsonObject obj = jsonElement.getAsJsonObject();
 
-                    if(obj.has("error")){
-                        done = true;
+                        if (obj != null) {
+
+                            if(obj.has("error")){
+                                done = true;
+                            }
+
+                            for (JsonElement e : obj.getAsJsonArray("results")) {
+                                chars.add(gson.fromJson(e, Character.class).getName());
+                            }
+
+                            runOnUiThread(new Runnable() {
+
+                                @Override
+                                public void run() {
+
+                                    list.notifyDataSetChanged();
+
+                                }
+                            });
+
+
+                            if (pageNo == 1) {
+                                JsonObject info = obj.getAsJsonObject("info");
+                                pageNo = info.get("pages").getAsInt();
+                            }
+
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
 
-
-
-                    JsonObject charsJson = obj.getAsJsonObject("results");
-
-                    if (page == 1) {
-                        JsonObject info = obj.getAsJsonObject("info");
-                        page = info.get("pages").getAsInt();
-                    }
-
-                    System.out.println(charsJson.toString());
-
-//                        ArrayAdapter<String> list = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_list_item_1, chars);
-//                        lv.setAdapter(list);
                 }
-
-            }
-
-            @Override
-            public void onFailure(Call<JsonElement> call, Throwable t) {
-
-                Toast.makeText(MainActivity.this, "API error", Toast.LENGTH_SHORT).show();
-                Log.e("xd", t.getMessage());
             }
         });
+
+        thread.start();
+
     }
 }
