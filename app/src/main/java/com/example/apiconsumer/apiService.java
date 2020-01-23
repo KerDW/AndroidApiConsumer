@@ -16,4 +16,7 @@ public interface apiService {
 
     @GET("character")
     Call<JsonElement> getCharacters(@Query("page") int page);
+
+    @GET("contacte/{id}")
+    Call<Contact> getContact(@Path("id") int id);
 }
