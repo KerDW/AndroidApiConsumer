@@ -122,33 +122,45 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void nameRequest(View view){
-        Call<Character> callAsync = service.getCharacter(charName.getText().toString());
+        Call<JsonElement> callAsync = service.getCharacter(charName.getText().toString());
 
-        callAsync.enqueue(new Callback<Character>()
+        callAsync.enqueue(new Callback<JsonElement>()
         {
 
             @Override
-            public void onResponse(Call<Character> call, Response<Character> response)
+            public void onResponse(Call<JsonElement> call, Response<JsonElement> response)
             {
-                if (response.isSuccessful())
+                if (response.body() != null)
                 {
-                    Character c = response.body();
+                    JsonElement jsonElement = response.body();
+                    JsonObject obj = jsonElement.getAsJsonObject();
+
+                    Character c = gson.fromJson(obj.getAsJsonArray("results").get(0), Character.class);
 
                     name.setText(c.getName());
                     species.setText(c.getSpecies());
                     status.setText(c.getStatus());
-                }
-                else
+                } else
                 {
                     System.out.println("Request Error :: " + response.errorBody());
+                    Toast.makeText(
+                            getApplicationContext(),
+                            "Name not found.",
+                            Toast.LENGTH_LONG).show();
                 }
             }
 
             @Override
-            public void onFailure(Call<Character> call, Throwable t)
+            public void onFailure(Call<JsonElement> call, Throwable t)
             {
                 System.out.println("Network Error :: " + t.getLocalizedMessage());
             }
         });
+    }
+
+    public void nextAct(View view) {
+
+        
+
     }
 }
