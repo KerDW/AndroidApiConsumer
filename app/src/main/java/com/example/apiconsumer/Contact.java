@@ -18,6 +18,10 @@ public class Contact {
         this.cognoms = cognoms;
     }
 
+    public Contact() {
+
+    }
+
     public String getNom() {
         return nom;
     }

@@ -89,7 +89,12 @@ public class LocalAPI extends AppCompatActivity {
 
     public void doPost(View view) {
 
-        Call<Contact> callAsync = service.postContact();
+        Contact c = new Contact();
+
+        c.nom = name.getText().toString();
+        c.cognoms = surname.getText().toString();
+
+        Call<Contact> callAsync = service.postContact(c);
 
         callAsync.enqueue(new Callback<Contact>()
         {
@@ -101,7 +106,7 @@ public class LocalAPI extends AppCompatActivity {
                 Log.e("xd", "good");
                 Toast.makeText(
                         getApplicationContext(),
-                        "Contact deleted.",
+                        "Contact created.",
                         Toast.LENGTH_LONG).show();
             }
 
