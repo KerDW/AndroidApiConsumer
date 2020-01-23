@@ -4,8 +4,12 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
@@ -25,7 +29,13 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class MainActivity extends AppCompatActivity {
 
     apiService service;
+
     ListView lv;
+    TextView name;
+    TextView species;
+    TextView status;
+    EditText charName;
+    Button nameR;
 
     int pageNo = 1;
     boolean done = false;
@@ -41,6 +51,11 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         lv = findViewById(R.id.characters);
+        charName = findViewById(R.id.charName);
+        nameR = findViewById(R.id.nameRequest);
+        name = findViewById(R.id.name);
+        species = findViewById(R.id.species);
+        status = findViewById(R.id.status);
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("https://rickandmortyapi.com/api/")
@@ -104,5 +119,36 @@ public class MainActivity extends AppCompatActivity {
 
         thread.start();
 
+    }
+
+    public void nameRequest(View view){
+        Call<Character> callAsync = service.getCharacter(charName.getText().toString());
+
+        callAsync.enqueue(new Callback<Character>()
+        {
+
+            @Override
+            public void onResponse(Call<Character> call, Response<Character> response)
+            {
+                if (response.isSuccessful())
+                {
+                    Character c = response.body();
+
+                    name.setText(c.getName());
+                    species.setText(c.getSpecies());
+                    status.setText(c.getStatus());
+                }
+                else
+                {
+                    System.out.println("Request Error :: " + response.errorBody());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Character> call, Throwable t)
+            {
+                System.out.println("Network Error :: " + t.getLocalizedMessage());
+            }
+        });
     }
 }
