@@ -17,7 +17,7 @@ public class Character {
     @Expose
     private String species;
 
-    @SerializedName("species")
+    @SerializedName("status")
     @Expose
     private String status;
 
