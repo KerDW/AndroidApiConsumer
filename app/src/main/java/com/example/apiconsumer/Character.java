@@ -17,6 +17,10 @@ public class Character {
     @Expose
     private String species;
 
+    @SerializedName("species")
+    @Expose
+    private String status;
+
     public int getId() {
         return id;
     }
@@ -27,5 +31,9 @@ public class Character {
 
     public String getSpecies() {
         return species;
+    }
+
+    public String getStatus() {
+        return status;
     }
 }

@@ -11,8 +11,8 @@ import retrofit2.http.Query;
 
 public interface apiService {
 
-    @GET("character/{idChar}")
-    Call<Character> getCharacter(@Path("idChar") int idChar);
+    @GET("character/{name}")
+    Call<Character> getCharacter(@Path("name") String name);
 
     @GET("character")
     Call<JsonElement> getCharacters(@Query("page") int page);
