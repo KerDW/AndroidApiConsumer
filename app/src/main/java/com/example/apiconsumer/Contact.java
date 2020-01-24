@@ -5,6 +5,10 @@ import com.google.gson.annotations.SerializedName;
 
 public class Contact {
 
+    @SerializedName("contacteId")
+    @Expose
+    public int contacteId;
+
     @SerializedName("nom")
     @Expose
     public String nom;
@@ -13,13 +17,22 @@ public class Contact {
     @Expose
     public String cognoms;
 
-    public Contact(String nom, String cognoms) {
+    public Contact(int contacteId, String nom, String cognoms) {
+        this.contacteId = contacteId;
         this.nom = nom;
         this.cognoms = cognoms;
     }
 
     public Contact() {
 
+    }
+
+    public int getId() {
+        return contacteId;
+    }
+
+    public void setId(int contacteId) {
+        this.contacteId = contacteId;
     }
 
     public String getNom() {

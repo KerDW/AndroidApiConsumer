@@ -5,14 +5,19 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -32,14 +37,16 @@ public class LocalAPI extends AppCompatActivity {
     EditText name;
     EditText surname;
 
-    TextView text1;
+    ListView lv;
+    ArrayList<String> contacts = new ArrayList<>();
+    ArrayAdapter<String> list;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_local_api);
 
-        text1 = findViewById(R.id.text);
+        lv = findViewById(R.id.conts);
         id = findViewById(R.id.idC);
         name = findViewById(R.id.cName);
         surname = findViewById(R.id.cSurname);
@@ -53,38 +60,50 @@ public class LocalAPI extends AppCompatActivity {
 
         service = retrofit.create(apiService.class);
 
-        Call<Contact> callAsync = service.getContact(3);
+        list = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, contacts);
+        lv.setAdapter(list);
 
-        callAsync.enqueue(new Callback<Contact>()
+        doGet();
+    }
+
+    public void doGet(){
+
+        Call<ArrayList<Contact>> callAsync = service.getContacts();
+
+        callAsync.enqueue(new Callback<ArrayList<Contact>>()
         {
 
             @Override
-            public void onResponse(Call<Contact> call, Response<Contact> response)
+            public void onResponse(Call<ArrayList<Contact>> call, Response<ArrayList<Contact>> response)
             {
-                Log.e("xd", call.request().url().toString());
                 if (response.body() != null)
                 {
+                    Log.e("xd", "here");
+                    contacts = new ArrayList<>();
 
-                    Contact c = response.body();
+                    for (Contact c : response.body()) {
+                        contacts.add(c.contacteId +" "+c.nom+" "+c.cognoms);
+                    }
 
-                    text1.setText(c.nom);
+                    list.notifyDataSetChanged();
 
                 } else
                 {
                     System.out.println("Request Error :: " + response.errorBody());
                     Toast.makeText(
                             getApplicationContext(),
-                            "Contact not found.",
+                            "Contacts not found.",
                             Toast.LENGTH_LONG).show();
                 }
             }
 
             @Override
-            public void onFailure(Call<Contact> call, Throwable t)
+            public void onFailure(Call<ArrayList<Contact>> call, Throwable t)
             {
                 System.out.println("Network Error :: " + t.getLocalizedMessage());
             }
         });
+
     }
 
     public void doPost(View view) {
@@ -102,12 +121,12 @@ public class LocalAPI extends AppCompatActivity {
             @Override
             public void onResponse(Call<Contact> call, Response<Contact> response)
             {
-                Log.e("xd", call.request().url().toString());
-                Log.e("xd", "good");
                 Toast.makeText(
                         getApplicationContext(),
                         "Contact created.",
                         Toast.LENGTH_LONG).show();
+
+                doGet();
             }
 
             @Override
@@ -121,8 +140,6 @@ public class LocalAPI extends AppCompatActivity {
 
     public void doDel(View view) {
 
-        Log.e("xd", Integer.parseInt(id.getText().toString())+"");
-
         Call<Contact> callAsync = service.delContact(Integer.parseInt(id.getText().toString()));
 
         callAsync.enqueue(new Callback<Contact>()
@@ -131,12 +148,47 @@ public class LocalAPI extends AppCompatActivity {
             @Override
             public void onResponse(Call<Contact> call, Response<Contact> response)
             {
-                Log.e("xd", call.request().url().toString());
-                Log.e("xd", "good");
                     Toast.makeText(
                             getApplicationContext(),
                             "Contact deleted.",
                             Toast.LENGTH_LONG).show();
+
+                doGet();
+            }
+
+            @Override
+            public void onFailure(Call<Contact> call, Throwable t)
+            {
+                System.out.println("Network Error :: " + t.getLocalizedMessage());
+            }
+        });
+
+    }
+
+    public void doPut(View view) {
+
+        Contact c = new Contact();
+
+        c.nom = name.getText().toString();
+        c.cognoms = surname.getText().toString();
+
+        Call<Contact> callAsync = service.putContact(Integer.parseInt(id.getText().toString()), c);
+
+        callAsync.enqueue(new Callback<Contact>()
+        {
+
+            @Override
+            public void onResponse(Call<Contact> call, Response<Contact> response)
+            {
+                Log.e("xd", call.request().url().toString());
+
+                Toast.makeText(
+                        getApplicationContext(),
+                        "Contact modified.",
+                        Toast.LENGTH_LONG).show();
+
+
+                doGet();
             }
 
             @Override
