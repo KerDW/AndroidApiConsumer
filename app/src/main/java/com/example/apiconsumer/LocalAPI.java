@@ -78,14 +78,21 @@ public class LocalAPI extends AppCompatActivity {
             {
                 if (response.body() != null)
                 {
+                    contacts.clear();
                     Log.e("xd", "here");
-                    contacts = new ArrayList<>();
 
                     for (Contact c : response.body()) {
                         contacts.add(c.contacteId +" "+c.nom+" "+c.cognoms);
                     }
 
-                    list.notifyDataSetChanged();
+                    runOnUiThread(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            list.notifyDataSetChanged();
+                        }
+
+                    });
 
                 } else
                 {
@@ -153,7 +160,7 @@ public class LocalAPI extends AppCompatActivity {
                             "Contact deleted.",
                             Toast.LENGTH_LONG).show();
 
-                doGet();
+
             }
 
             @Override
@@ -163,6 +170,7 @@ public class LocalAPI extends AppCompatActivity {
             }
         });
 
+        doGet();
     }
 
     public void doPut(View view) {
